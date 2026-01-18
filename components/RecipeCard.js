@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, Dimensions } from 'react-native';
 import { colors } from '../styles/theme';
 
 const { width } = Dimensions.get('window');
-const cardSize = (width - 60) / 3; // Calcula 3 colunas com espaçamento
+const cardSize = (width - 60) / 3;
 
 export default function RecipeCard({ title, updated }) {
   return (
