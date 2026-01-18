@@ -6,32 +6,35 @@ import {
   ScrollView, 
   TextInput, 
   TouchableOpacity,
-  Dimensions 
+  StatusBar
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import RecipeCard from '../components/RecipeCard';
+import { useTheme } from '../styles/themes';
 
 export default function FavoritesScreen() {
   const insets = useSafeAreaInsets();
+  const { colors, isDark } = useTheme();
   
   const categorias = ['Breakfast', 'Lunch', 'Dinner', 'Drinks', 'Dessert', 'Snacks', 'Vegan'];
-
   const favoritos = []; 
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top }]}>
-      <Text style={styles.headerTitle}>Chef em Casa</Text>
+    <View style={[styles.container, { paddingTop: insets.top, backgroundColor: colors.background }]}>
+      <StatusBar barStyle={isDark ? "light-content" : "dark-content"} />
+      
+      <Text style={[styles.headerTitle, { color: colors.primary }]}>Chef em Casa</Text>
+      
       <View style={styles.searchRow}>
-        <View style={styles.inputContainer}>
-          <Ionicons name="heart-outline" size={20} color="#C887B2" style={styles.searchIcon} />
+        <View style={[styles.inputContainer, { backgroundColor: colors.surface }]}>
+          <Ionicons name="heart-outline" size={20} color={colors.primary} style={styles.searchIcon} />
           <TextInput 
             placeholder="Ex: tomate, queijo, leite..." 
-            style={styles.input}
-            placeholderTextColor="#888"
-          />
+            style={[styles.input, { color: colors.text }]} 
+            placeholderTextColor={isDark ? "#FFFFFF" : "#888"}
+        />
         </View>
-        <TouchableOpacity style={styles.addButton}>
+        <TouchableOpacity style={[styles.addButton, { backgroundColor: colors.primary }]}>
           <Text style={styles.addButtonText}>+</Text>
         </TouchableOpacity>
       </View>
@@ -43,8 +46,17 @@ export default function FavoritesScreen() {
           contentContainerStyle={styles.categoriesContent}
         >
           {categorias.map((cat, index) => (
-            <TouchableOpacity key={index} style={styles.categoryBadge}>
-              <Text style={styles.categoryText}>{cat}</Text>
+            <TouchableOpacity 
+              key={index} 
+              style={[
+                styles.categoryBadge, 
+                { 
+                  borderColor: colors.primary, 
+                  backgroundColor: isDark ? colors.background : 'white' 
+                }
+              ]}
+            >
+              <Text style={[styles.categoryText, { color: colors.primary }]}>{cat}</Text>
             </TouchableOpacity>
           ))}
         </ScrollView>
@@ -56,9 +68,13 @@ export default function FavoritesScreen() {
       >
         {favoritos.length === 0 ? (
           <View style={styles.emptyState}>
-            <Ionicons name="bookmark-outline" size={60} color="#DDD" />
-            <Text style={styles.emptyText}>Você ainda não tem receitas salvas.</Text>
-            <Text style={styles.emptySubtext}>Toque no coração em uma receita para salvá-la.</Text>
+            <Ionicons name="bookmark-outline" size={60} color={colors.darkGray} />
+            <Text style={[styles.emptyText, { color: colors.text }]}>
+              Você ainda não tem receitas salvas.
+            </Text>
+            <Text style={[styles.emptySubtext, { color: colors.darkGray }]}>
+              Toque no coração em uma receita para salvá-la.
+            </Text>
           </View>
         ) : (
           <View style={styles.grid}>
@@ -72,12 +88,10 @@ export default function FavoritesScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FDF7FA',
     paddingHorizontal: 20,
   },
   headerTitle: {
     fontSize: 28,
-    color: '#C887B2',
     fontWeight: 'bold',
     marginVertical: 15,
   },
@@ -89,7 +103,6 @@ const styles = StyleSheet.create({
   inputContainer: {
     flex: 1,
     flexDirection: 'row',
-    backgroundColor: '#EAEAEA',
     borderRadius: 10,
     alignItems: 'center',
     paddingHorizontal: 12,
@@ -101,10 +114,8 @@ const styles = StyleSheet.create({
   input: {
     flex: 1,
     fontSize: 14,
-    color: '#333',
   },
   addButton: {
-    backgroundColor: '#C887B2',
     width: 45,
     height: 45,
     borderRadius: 10,
@@ -117,7 +128,6 @@ const styles = StyleSheet.create({
     fontSize: 26,
     fontWeight: '300',
   },
-
   categoriesContainer: {
     marginBottom: 20,
     height: 35, 
@@ -129,14 +139,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 18,
     borderRadius: 10,
     borderWidth: 1,
-    borderColor: '#C887B2',
     marginRight: 10,
     justifyContent: 'center',
-    backgroundColor: 'white',
     height: 30,
   },
   categoryText: {
-    color: '#C887B2',
     fontSize: 13,
     fontWeight: '500',
   },
@@ -157,13 +164,11 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     fontSize: 16,
-    color: '#666',
     fontWeight: 'bold',
     marginTop: 15,
   },
   emptySubtext: {
     fontSize: 14,
-    color: '#999',
     marginTop: 5,
     textAlign: 'center'
   }

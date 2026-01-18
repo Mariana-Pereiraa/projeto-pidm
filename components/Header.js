@@ -7,7 +7,7 @@ export default function Header() {
   return (
     <View style={styles.header}>
       <View style={styles.logoCircle}>
-        <Ionicons name="restaurant-outline" size={40} color="black" />
+        <Ionicons name="restaurant-outline" size={40} color="#D8B0C8" />
       </View>
       <Text style={styles.title}>CHEF EM CASA</Text>
       <Text style={styles.subtitle}>
