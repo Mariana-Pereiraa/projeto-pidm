@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, Dimensions } from 'react-native';
-import { colors } from '../styles/theme';
+import { colors } from '../styles/themes';
 
 const { width } = Dimensions.get('window');
 const cardSize = (width - 60) / 3;

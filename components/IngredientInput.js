@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, TextInput, TouchableOpacity, Text, StyleSheet } from 'react-native';
-import { colors } from '../styles/theme';
+import { colors } from '../styles/themes';
 
 export default function IngredientInput({ value, onChangeText, onAdd }) {
   return (

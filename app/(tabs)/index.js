@@ -2,22 +2,21 @@ import React, { useState } from 'react';
 import { View, StyleSheet, Text } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
-import HomeScreen from './src/screens/HomeScreen';
-import FavoritesScreen from './src/screens/FavoriteScreen';
-import Navbar from './src/components/Navbar';
+import HomeScreen from '../../screens/HomeScreen';
+import FavoriteScreen from '../../screens/FavoriteScreen';
+import Navbar from '../../components/NavBar';
+
 
 export default function App() {
   const [currentScreen, setCurrentScreen] = useState('Home');
 
-  // Função para renderizar a tela selecionada
   const renderScreen = () => {
     switch (currentScreen) {
       case 'Home':
         return <HomeScreen />;
       case 'Favorites':
-        return <FavoritesScreen />;
+        return <FavoriteScreen />;
       case 'Settings':
-        // Tela temporária de Settings
         return (
           <View style={styles.center}>
             <Text>Configurações em breve...</Text>

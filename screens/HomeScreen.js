@@ -8,7 +8,7 @@ import {
   ScrollView 
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { colors } from '../styles/theme';
+import { colors } from '../styles/themes';
 
 export default function HomeScreen() {
   const [ingrediente, setIngrediente] = useState('');
