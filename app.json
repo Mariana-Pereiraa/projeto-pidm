@@ -3,6 +3,11 @@
     "name": "projeto-final",
     "slug": "projeto-final",
     "version": "1.0.0",
+
+    "extra": {
+      "SPOONACULAR_API_KEY": "9485afbb6f004eeab8ecfe5bf0aea0d3"
+    },
+
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "projetofinal",
