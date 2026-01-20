@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   StyleSheet,
   View,
@@ -13,6 +13,7 @@ import {
 
 import { Ionicons } from '@expo/vector-icons';
 
+import { auth } from '../services/firebaseConfig';
 import { useTheme } from '../styles/themes';
 import {
   buscarReceitasPorIngredientes,
@@ -21,6 +22,17 @@ import {
 import RecipeCard from '../components/RecipeCard';
 
 export default function HomeScreen() {
+  const { colors, isDark } = useTheme();
+
+  const [nomeUsuario, setNomeUsuario] = useState("");
+
+  useEffect(() => {
+    const user = auth.currentUser;
+    if (user?.displayName) {
+      setNomeUsuario(user.displayName);
+    }
+  }, []);
+
   const [modalVisivel, setModalVisivel] = useState(false);
   const [receitaSelecionada, setReceitaSelecionada] = useState(null);
   const [ingrediente, setIngrediente] = useState('');
@@ -28,10 +40,8 @@ export default function HomeScreen() {
   const [receitas, setReceitas] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  const { colors, isDark } = useTheme();
   const adicionarIngrediente = () => {
     if (!ingrediente.trim()) return;
-
     setListaIngredientes((prev) => [...prev, ingrediente.trim()]);
     setIngrediente('');
   };
@@ -71,7 +81,13 @@ export default function HomeScreen() {
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} />
 
-      <ScrollView contentContainerStyle={styles.content}>
+      <View style={styles.topBar}>
+        <Text style={[styles.welcomeText, { color: colors.primary }]}>
+          Olá, Chefe {nomeUsuario}!
+        </Text>
+      </View>
+
+      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         <View style={styles.header}>
           <View style={[styles.logoCircle, { backgroundColor: colors.primary }]}>
             <Ionicons
@@ -102,7 +118,7 @@ export default function HomeScreen() {
                 { backgroundColor: colors.surface, color: colors.text },
               ]}
               placeholder="Ex: tomate, queijo, leite..."
-              placeholderTextColor={isDark ? '#FFF' : '#888'}
+              placeholderTextColor={isDark ? '#AAA' : '#888'}
               value={ingrediente}
               onChangeText={setIngrediente}
             />
@@ -141,9 +157,7 @@ export default function HomeScreen() {
               styles.searchButton,
               {
                 backgroundColor: colors.primary,
-                borderBottomColor: isDark
-                  ? '#8A4F75'
-                  : colors.secondary,
+                borderBottomColor: isDark ? '#8A4F75' : colors.secondary,
               },
             ]}
             onPress={buscarReceitas}
@@ -157,7 +171,7 @@ export default function HomeScreen() {
 
         {receitas.length > 0 && (
           <View style={styles.resultsContainer}>
-            <Text style={[styles.label, { marginTop: 20 }]}>
+            <Text style={[styles.label, { marginTop: 20, color: colors.primary }]}>
               RECEITAS ENCONTRADAS
             </Text>
 
@@ -203,35 +217,26 @@ export default function HomeScreen() {
                     style={styles.modalImage}
                   />
 
-                  <Text
-                    style={[
-                      styles.modalTitle,
-                      { color: colors.primary },
-                    ]}
-                  >
+                  <Text style={[styles.modalTitle, { color: colors.primary }]}>
                     {receitaSelecionada.title?.toUpperCase()}
                   </Text>
 
-                  <Text style={styles.modalSectionTitle}>
+                  <Text style={[styles.modalSectionTitle, {color: colors.text}]}>
                     INGREDIENTES
                   </Text>
 
-                  {receitaSelecionada.extendedIngredients?.map(
-                    (ing, index) => (
-                      <Text key={index} style={styles.modalText}>
-                        • {ing.original}
-                      </Text>
-                    )
-                  )}
+                  {receitaSelecionada.extendedIngredients?.map((ing, index) => (
+                    <Text key={index} style={[styles.modalText, {color: colors.text}]}>
+                      • {ing.original}
+                    </Text>
+                  ))}
 
-                  <Text style={styles.modalSectionTitle}>
+                  <Text style={[styles.modalSectionTitle, {color: colors.text}]}>
                     MODO DE PREPARO
                   </Text>
 
-                  <Text style={styles.modalText}>
-                    {receitaSelecionada.instructions
-                      ?.replace(/<[^>]*>?/gm, '') ||
-                      'Instruções não disponíveis.'}
+                  <Text style={[styles.modalText, {color: colors.text}]}>
+                    {receitaSelecionada.instructions?.replace(/<[^>]*>?/gm, '') || 'Instruções não disponíveis.'}
                   </Text>
                 </>
               )}
@@ -245,8 +250,16 @@ export default function HomeScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
+  topBar: {
+    width: '100%',
+    paddingHorizontal: 25,
+    paddingTop: 15,
+  },
+  welcomeText: {
+    fontSize: 14,
+    fontWeight: 'bold',
+  },
   content: { padding: 20, alignItems: 'center' },
-
   header: { alignItems: 'center', marginBottom: 30 },
   logoCircle: {
     width: 80,
@@ -256,21 +269,18 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 10,
   },
-
   title: { fontSize: 18, fontWeight: 'bold' },
   subtitle: {
     textAlign: 'center',
     fontSize: 12,
     paddingHorizontal: 20,
   },
-
   ingredientsSection: { width: '100%' },
   label: {
     fontWeight: 'bold',
     marginBottom: 10,
     textAlign: 'center',
   },
-
   inputRow: { flexDirection: 'row', marginBottom: 20 },
   input: {
     flex: 1,
@@ -278,7 +288,6 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     paddingHorizontal: 15,
   },
-
   addButton: {
     width: 45,
     height: 45,
@@ -287,16 +296,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-
   addButtonText: { color: '#FFF', fontSize: 24 },
-
   tagsContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     width: '100%',
     marginBottom: 30,
   },
-
   tag: {
     flexDirection: 'row',
     padding: 8,
@@ -304,10 +310,8 @@ const styles = StyleSheet.create({
     marginRight: 10,
     marginBottom: 10,
   },
-
   tagText: { fontSize: 14 },
   removeTag: { fontWeight: 'bold', marginLeft: 8 },
-
   searchButton: {
     width: '100%',
     height: 50,
@@ -316,54 +320,45 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderBottomWidth: 4,
   },
-
   searchButtonText: {
     color: '#FFF',
     fontWeight: 'bold',
   },
-
   resultsContainer: { width: '100%' },
   grid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-between',
   },
-
   modalCenteredView: {
     flex: 1,
     justifyContent: 'flex-end',
     backgroundColor: 'rgba(0,0,0,0.6)',
   },
-
   modalView: {
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     padding: 20,
     height: '90%',
   },
-
   closeButton: { alignSelf: 'flex-end', marginBottom: 10 },
-
   modalImage: {
     width: '100%',
     height: 200,
     borderRadius: 15,
     marginBottom: 15,
   },
-
   modalTitle: {
     fontSize: 20,
     fontWeight: 'bold',
     textAlign: 'center',
     marginBottom: 15,
   },
-
   modalSectionTitle: {
     fontSize: 16,
     fontWeight: 'bold',
     marginTop: 15,
   },
-
   modalText: {
     fontSize: 14,
     lineHeight: 22,

@@ -13,56 +13,68 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../styles/themes';
+
 import { auth } from '../services/firebaseConfig';
-import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
 
 export default function RegisterScreen({ onBackToLogin }) {
   const { colors, isDark } = useTheme();
-
+  
   const [nome, setNome] = useState('');
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
   const [confirmarSenha, setConfirmarSenha] = useState('');
-
+  
   const [verSenha, setVerSenha] = useState(true);
   const [verConfirmar, setVerConfirmar] = useState(true);
 
-  const handleFirebaseRegister = async () => {
-    if (!email || !senha || !confirmarSenha) {
-      Alert.alert("Erro", "Por favor, preencha todos os campos.");
-      return;
+const handleFirebaseRegister = async () => {
+  const nomeLimpo = nome.trim();
+  const emailLimpo = email.trim();
+
+  if (!nomeLimpo || !emailLimpo || !senha || !confirmarSenha) {
+    alert("Preencha todos os campos!");
+    return;
+  }
+
+  const emailRegex = /\S+@\S+\.\S+/;
+  if (!emailRegex.test(emailLimpo)) {
+    alert("E-mail inválido! Use o formato: nome@exemplo.com");
+    return;
+  }
+
+  if (senha !== confirmarSenha) {
+    alert("As senhas não coincidem!");
+    return;
+  }
+
+  if (senha.length < 6) {
+    alert("A senha deve ter pelo menos 6 caracteres.");
+    return;
+  }
+
+  try {
+    const userCredential = await createUserWithEmailAndPassword(auth, emailLimpo, senha);
+    
+    await updateProfile(userCredential.user, {
+      displayName: nomeLimpo
+    });
+    
+    alert("Conta criada com sucesso! Chefe " + nomeLimpo + ", seja bem-vindo(a).");
+    onBackToLogin(); 
+    
+  } catch (error) {
+    console.log("Erro Firebase:", error.code);
+
+    if (error.code === 'auth/email-already-in-use') {
+      alert("Este e-mail já está cadastrado em outra conta.");
+    } else if (error.code === 'auth/invalid-email') {
+      alert("O endereço de e-mail é inválido.");
+    } else {
+      alert("Erro ao cadastrar: " + error.message);
     }
-
-    if (senha !== confirmarSenha) {
-      Alert.alert("Erro", "As senhas não coincidem!");
-      return;
-    }
-
-    if (senha.length < 6) {
-      Alert.alert("Erro", "A senha deve ter pelo menos 6 caracteres.");
-      return;
-    }
-
-    try {
-      await createUserWithEmailAndPassword(auth, email, senha);
-      
-      Alert.alert("Sucesso!", "Sua conta foi criada com sucesso!");
-
-      onBackToLogin(); 
-      
-    } catch (error) {
-      console.log(error.code);
-
-      if (error.code === 'auth/email-already-in-use') {
-        Alert.alert("Erro", "Este e-mail já está sendo usado por outra conta.");
-      } else if (error.code === 'auth/invalid-email') {
-        Alert.alert("Erro", "O formato do e-mail é inválido.");
-      } else {
-        Alert.alert("Erro", "Não foi possível realizar o cadastro. Tente novamente.");
-      }
-    }
-  };
-
+  }
+};
   return (
     <KeyboardAvoidingView 
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -98,13 +110,19 @@ export default function RegisterScreen({ onBackToLogin }) {
           />
 
           <TextInput
-            style={[styles.input, { backgroundColor: colors.surface, color: colors.text, borderColor: colors.border }]}
+            style={[
+              styles.input, { 
+              backgroundColor: colors.surface, 
+              color: colors.text, 
+              borderColor: colors.border 
+            }]}
             placeholder="E-MAIL"
             placeholderTextColor={colors.darkGray}
             value={email}
             onChangeText={setEmail}
             keyboardType="email-address"
             autoCapitalize="none"
+            autoCorrect={false}
           />
 
           <View style={[styles.passwordContainer, { backgroundColor: colors.surface, borderColor: colors.border }]}>
@@ -124,7 +142,7 @@ export default function RegisterScreen({ onBackToLogin }) {
           <View style={[styles.passwordContainer, { backgroundColor: colors.surface, borderColor: colors.border }]}>
             <TextInput
               style={[styles.inputPassword, { color: colors.text }]}
-              placeholder="CONFIRMAR SENHA"
+              placeholder="CONFIRME SUA SENHA"
               placeholderTextColor={colors.darkGray}
               secureTextEntry={verConfirmar}
               value={confirmarSenha}
@@ -137,10 +155,10 @@ export default function RegisterScreen({ onBackToLogin }) {
 
           <TouchableOpacity 
             style={[styles.registerButton, { backgroundColor: colors.primary }]}
-            activeOpacity={0.8}
             onPress={handleFirebaseRegister}
+            activeOpacity={0.8}
           >
-            <Text style={styles.registerButtonText}>CADASTRAR-SE</Text>
+            <Text style={styles.registerButtonText}>CADASTRAR</Text>
           </TouchableOpacity>
         </View>
 
@@ -173,10 +191,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 10,
     elevation: 5,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 2,
   },
   title: { fontSize: 22, fontWeight: 'bold', letterSpacing: 1.5 },
   subtitle: { fontSize: 16, fontWeight: 'bold', marginTop: 5 },
@@ -199,12 +213,11 @@ const styles = StyleSheet.create({
   inputPassword: { flex: 1, height: '100%', paddingHorizontal: 15 },
   eyeIcon: { paddingRight: 15 },
   registerButton: {
-    height: 50,
+    height: 55,
     borderRadius: 8,
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 10,
-    elevation: 3,
+    marginTop: 15,
   },
   registerButtonText: { color: '#FFFFFF', fontSize: 14, fontWeight: 'bold' },
 });

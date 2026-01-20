@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'; 
 import { View, StyleSheet } from 'react-native';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
+
 import { ThemeProvider, useTheme } from '../../styles/themes'; 
 import { auth } from '../../services/firebaseConfig'; 
 import { onAuthStateChanged } from 'firebase/auth';
@@ -18,22 +19,30 @@ function AppContent() {
   const { colors } = useTheme();
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
-        setIsLogged(true);
-        if (currentScreen === 'Login' || currentScreen === 'Register') {
-           setCurrentScreen('Home');
+        try {
+          await user.reload();
+        } catch (error) {
+          console.log("Erro ao recarregar perfil:", error);
         }
+
+        setIsLogged(true);
+
+        setCurrentScreen(prev => 
+          (prev === 'Favorites' || prev === 'Settings') ? prev : 'Home'
+        );
       } else {
         setIsLogged(false);
         setAuthMode('Login');
+        setCurrentScreen('Home');
       }
     });
 
     return () => unsubscribe(); 
   }, []);
 
-  const handleLogin = () => {
+  const navegarParaHome = () => {
     setIsLogged(true);
     setCurrentScreen('Home');
   };
@@ -43,7 +52,7 @@ function AppContent() {
       if (authMode === 'Login') {
         return (
           <LoginScreen 
-            onLogin={handleLogin} 
+            onLogin={navegarParaHome} 
             onGoToRegister={() => setAuthMode('Register')} 
           />
         );
@@ -51,16 +60,21 @@ function AppContent() {
         return (
           <RegisterScreen 
             onBackToLogin={() => setAuthMode('Login')} 
+            onLogin={navegarParaHome} 
           />
         );
       }
     }
 
     switch (currentScreen) {
-      case 'Home': return <HomeScreen />;
-      case 'Favorites': return <FavoriteScreen />;
-      case 'Settings': return <SettingsScreen />;
-      default: return <HomeScreen />;
+      case 'Home': 
+        return <HomeScreen />;
+      case 'Favorites': 
+        return <FavoriteScreen />;
+      case 'Settings': 
+        return <SettingsScreen />;
+      default: 
+        return <HomeScreen />;
     }
   };
 
@@ -71,7 +85,10 @@ function AppContent() {
       </View>
       
       {isLogged && (
-        <Navbar onNavigate={setCurrentScreen} currentScreen={currentScreen} />
+        <Navbar 
+          onNavigate={setCurrentScreen} 
+          currentScreen={currentScreen} 
+        />
       )}
     </SafeAreaView>
   );
@@ -88,6 +105,10 @@ export default function App() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
-  main: { flex: 1 }
+  container: { 
+    flex: 1 
+  },
+  main: { 
+    flex: 1 
+  }
 });

@@ -1,34 +1,30 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert } from 'react-native';
+import { 
+  View, 
+  Text, 
+  StyleSheet, 
+  TouchableOpacity, 
+  ScrollView, 
+  Alert, 
+  Platform 
+} from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../styles/themes';
-
 import { auth } from '../services/firebaseConfig';
 import { signOut } from 'firebase/auth';
 
 export default function SettingsScreen() {
   const { styles, colors, isDark, toggleTheme } = useTheme();
 
-  const handleLogout = () => {
-    Alert.alert(
-      "Sair",
-      "Tem certeza que deseja sair da conta?",
-      [
-        { text: "Cancelar", style: "cancel" },
-        { 
-          text: "Sair", 
-          style: "destructive",
-          onPress: async () => {
-            try {
-              await signOut(auth);
-            } catch (error) {
-              Alert.alert("Erro", "Não foi possível sair agora.");
-            }
-          } 
-        }
-      ]
-    );
-  };
+const handleLogout = async () => {
+  console.log("Botão clicado! Tentando deslogar agora...");
+  try {
+    await signOut(auth);
+  } catch (error) {
+    console.error("Erro ao deslogar:", error);
+    alert("Erro ao sair");
+  }
+};
 
   const renderSettingItem = (icon, title, value, type = 'arrow', onPress = null) => (
     <TouchableOpacity 
@@ -73,16 +69,19 @@ export default function SettingsScreen() {
   );
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+    <ScrollView 
+      style={[styles.container, { backgroundColor: colors.background }]} 
+      contentContainerStyle={[styles.content, { flexGrow: 1, paddingBottom: 40 }]}
+    >
       <View style={styles.header}>
-        <View style={styles.logoCircle}>
+        <View style={[styles.logoCircle, { backgroundColor: colors.primary }]}>
           <Ionicons 
             name="settings-outline" 
             size={40} 
             color={isDark ? "#2D1424" : "#FDF7FA"}
           />
         </View>
-        <Text style={styles.title}>CONFIGURAÇÕES</Text>
+        <Text style={[styles.title, { color: colors.primary }]}>CONFIGURAÇÕES</Text>
       </View>
 
       <View style={localStyles.section}>
@@ -92,6 +91,7 @@ export default function SettingsScreen() {
 
       <TouchableOpacity 
         style={[localStyles.logoutButton, { borderColor: colors.primary }]}
+        activeOpacity={0.6}
         onPress={handleLogout}
       >
         <Text style={[localStyles.logoutText, { color: colors.primary }]}>SAIR DA CONTA</Text>
@@ -119,10 +119,12 @@ const localStyles = StyleSheet.create({
     width: '100%',
     padding: 15,
     borderRadius: 8,
-    borderWidth: 1,
+    borderWidth: 1.5,
     alignItems: 'center',
     marginTop: 20,
+    backgroundColor: 'transparent',
+    zIndex: 10,
   },
-  logoutText: { fontWeight: 'bold' },
-  version: { marginTop: 30, fontSize: 12, marginBottom: 20 }
+  logoutText: { fontWeight: 'bold', fontSize: 16 },
+  version: { marginTop: 30, fontSize: 12, marginBottom: 20, textAlign: 'center', width: '100%' }
 });
