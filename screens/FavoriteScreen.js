@@ -1,4 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useFocusEffect } from '@react-navigation/native';
 import { 
   View, 
   Text, 
@@ -6,38 +8,78 @@ import {
   ScrollView, 
   TextInput, 
   TouchableOpacity,
-  StatusBar
+  StatusBar,
+  ActivityIndicator,
+  Modal,
+  Image
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../styles/themes';
+import RecipeCard from '@/components/RecipeCard';
+import { buscarDetalhesReceita } from '@/services/service';
 
 export default function FavoritesScreen() {
+  const [favorite, setFavorite] = useState([]);
   const insets = useSafeAreaInsets();
   const { colors, isDark } = useTheme();
-  
+  const [loading, setLoading] = useState(false);
   const categorias = ['Breakfast', 'Lunch', 'Dinner', 'Drinks', 'Dessert', 'Snacks', 'Vegan'];
-  const favoritos = []; 
+  const [modalVisivel, setModalVisivel] = useState(false);
+  const [receitaSelecionada, setReceitaSelecionada] = useState(null);
+  useFocusEffect(
+    React.useCallback(() => {
+      const buscarFavoritos = async () => {
+        try {
+          const dados = await AsyncStorage.getItem('@favoritos');
+          if (dados) {
+            setFavorite(JSON.parse(dados));
+          }
+        } catch (error) {
+          console.error("Erro ao carregar favoritos", error);
+        }
+      };
+      buscarFavoritos();
+    }, [])
+  );
+
+  const removerFavorito = async (id) => {
+    try{
+      const novaLista = favorite.filter(item => item.id !== id);
+      setFavorite(novaLista);
+      await AsyncStorage.setItem('@favoritos', JSON.stringify(novaLista));
+      if(receitaSelecionada?.id === id){
+        setModalVisivel(false);
+      }
+    }catch(error){
+      console.error("Erro ao remover favorito", error);
+    }
+  }
+
+  const selecionarReceita = async (id) => {
+    try {
+      setLoading(true);
+      const detalhes = await buscarDetalhesReceita(id);
+      setReceitaSelecionada(detalhes);
+      setModalVisivel(true);
+    } catch (error) {
+      alert('Erro ao carregar detalhes da receita');
+    } finally {
+      setLoading(false);
+    }
+  };
+
 
   return (
     <View style={[styles.container, { paddingTop: insets.top, backgroundColor: colors.background }]}>
       <StatusBar barStyle={isDark ? "light-content" : "dark-content"} />
       
-      <Text style={[styles.headerTitle, { color: colors.primary }]}>Chef em Casa</Text>
-      
-      <View style={styles.searchRow}>
-        <View style={[styles.inputContainer, { backgroundColor: colors.surface }]}>
-          <Ionicons name="heart-outline" size={20} color={colors.primary} style={styles.searchIcon} />
-          <TextInput 
-            placeholder="Ex: tomate, queijo, leite..." 
-            style={[styles.input, { color: colors.text }]} 
-            placeholderTextColor={isDark ? "#FFFFFF" : "#888"}
-        />
+      {loading && (
+        <View style={styles.loadingOverlay}>
+          <ActivityIndicator size="large" color={colors.primary} />
         </View>
-        <TouchableOpacity style={[styles.addButton, { backgroundColor: colors.primary }]}>
-          <Text style={styles.addButtonText}>+</Text>
-        </TouchableOpacity>
-      </View>
+      )}
+      <Text style={[styles.headerTitle, { color: colors.primary }]}>Chef em Casa</Text>
 
       <View style={styles.categoriesContainer}>
         <ScrollView 
@@ -66,7 +108,7 @@ export default function FavoritesScreen() {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        {favoritos.length === 0 ? (
+        {favorite.length === 0 ? (
           <View style={styles.emptyState}>
             <Ionicons name="bookmark-outline" size={60} color={colors.darkGray} />
             <Text style={[styles.emptyText, { color: colors.text }]}>
@@ -78,9 +120,60 @@ export default function FavoritesScreen() {
           </View>
         ) : (
           <View style={styles.grid}>
+              {favorite.map((item) => (
+                <RecipeCard
+                  key={item.id}
+                  title={item.title}
+                  image={item.image}
+                  isFavorite={true}
+                  onFavoritePress={() => removerFavorito(item.id)}
+                  onPress={() => selecionarReceita(item.id)}
+                />
+              ))}
           </View>
         )}
       </ScrollView>
+
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalVisivel}
+        onRequestClose={() => setModalVisivel(false)}
+      >
+        <View style={styles.modalCenteredView}>
+          <View style={[styles.modalView, { backgroundColor: isDark ? colors.background : 'white' }]}>
+            <TouchableOpacity style={styles.closeButton} onPress={() => setModalVisivel(false)}>
+              <Ionicons name="close" size={30} color={colors.primary} />
+            </TouchableOpacity>
+
+            <ScrollView showsVerticalScrollIndicator={false}>
+              {receitaSelecionada && (
+                <>
+                  <Image source={{ uri: receitaSelecionada.image }} style={styles.modalImage} />
+                  
+                  <TouchableOpacity 
+                    style={styles.modalFavoriteButton}
+                    onPress={() => removerFavorito(receitaSelecionada.id)}
+                  >
+                    <Ionicons name="heart" size={24} color={colors.primary} />
+                    <Text style={{color: colors.primary, marginLeft: 8}}>Remover dos Favoritos</Text>
+                  </TouchableOpacity>
+
+                  <Text style={[styles.modalTitle, { color: colors.primary }]}>{receitaSelecionada.title?.toUpperCase()}</Text>
+                  <Text style={[styles.modalSectionTitle, { color: colors.text }]}>INGREDIENTES</Text>
+                  {receitaSelecionada.extendedIngredients?.map((ing, index) => (
+                    <Text key={index} style={[styles.modalText, { color: colors.text }]}>• {ing.original}</Text>
+                  ))}
+                  <Text style={[styles.modalSectionTitle, { color: colors.text }]}>MODO DE PREPARO</Text>
+                  <Text style={[styles.modalText, { color: colors.text }]}>
+                    {receitaSelecionada.instructions?.replace(/<[^>]*>?/gm, '') || 'Instruções não disponíveis.'}
+                  </Text>
+                </>
+              )}
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -155,6 +248,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-between',
+    width: '100%',
+    paddingHorizontal: 2,
   },
   emptyState: {
     flex: 1,
@@ -171,5 +266,67 @@ const styles = StyleSheet.create({
     fontSize: 14,
     marginTop: 5,
     textAlign: 'center'
-  }
+  },
+  loadingOverlay: { 
+    ...StyleSheet.absoluteFillObject, 
+    backgroundColor: 'rgba(0,0,0,0.3)', 
+    justifyContent: 'center', 
+    alignItems: 'center', 
+    zIndex: 1000 
+  },
+  
+  modalCenteredView: { 
+    flex: 1, 
+    justifyContent: 'flex-end', 
+    backgroundColor: 'rgba(0,0,0,0.6)' 
+  },
+  
+  modalView: { 
+    borderTopLeftRadius: 20, 
+    borderTopRightRadius: 20, 
+    padding: 20, 
+    height: '90%' 
+  },
+  
+  closeButton: { 
+    alignSelf: 'flex-end', 
+    marginBottom: 10 
+  },
+  
+  modalImage: { 
+    width: '100%', 
+    height: 200, 
+    borderRadius: 15, 
+    marginBottom: 15 
+  },
+  
+  modalTitle: { 
+    fontSize: 20, 
+    fontWeight: 'bold', 
+    textAlign: 'center', 
+    marginBottom: 15 
+  },
+  
+  modalSectionTitle: { 
+    fontSize: 16, 
+    fontWeight: 'bold', 
+    marginTop: 15, 
+    marginBottom: 5 
+  },
+  
+  modalText: { 
+    fontSize: 14, 
+    lineHeight: 22, 
+    marginBottom: 5 
+  },
+  
+  modalFavoriteButton: { 
+    flexDirection: 'row', 
+    alignItems: 'center', 
+    justifyContent: 'center', 
+    padding: 10, 
+    borderRadius: 10, 
+    marginBottom: 15, 
+    backgroundColor: 'rgba(200, 135, 178, 0.1)' 
+  },
 });

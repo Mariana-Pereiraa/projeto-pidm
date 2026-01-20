@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   StyleSheet,
   View,
@@ -10,6 +10,8 @@ import {
   Image,
   StatusBar,
 } from 'react-native';
+
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import { Ionicons } from '@expo/vector-icons';
 
@@ -27,6 +29,7 @@ export default function HomeScreen() {
   const [listaIngredientes, setListaIngredientes] = useState([]);
   const [receitas, setReceitas] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [favoritos, setFavoritos] = useState([]);
 
   const { colors, isDark } = useTheme();
   const adicionarIngrediente = () => {
@@ -45,10 +48,18 @@ export default function HomeScreen() {
   const buscarReceitas = async () => {
     try {
       setLoading(true);
+      // setTimeout(() => {
+      //   const dadosMock = [
+      //     { id: 1, title: 'Receita de Teste 1', image: 'https://via.placeholder.com/150' },
+      //     { id: 2, title: 'Receita de Teste 2', image: 'https://via.placeholder.com/150' },
+      //   ];
+      //   setReceitas();
+      //   setLoading(false);
+      // }, 1000);
       const resultado = await buscarReceitasPorIngredientes(listaIngredientes);
       setReceitas(resultado);
     } catch {
-      alert('Erro ao buscar receitas 😢');
+      alert('Erro ao buscar receitas');
     } finally {
       setLoading(false);
     }
@@ -57,14 +68,38 @@ export default function HomeScreen() {
   const selecionarReceita = async (id) => {
     try {
       setLoading(true);
-      const detalhes = await buscarDetalhesReceita(id);
-      setReceitaSelecionada(detalhes);
-      setModalVisivel(true);
+      const detalhes = await buscarDetalhesReceita(id)
+      setReceitaSelecionada(detalhes)
+      setModalVisivel(true)
     } catch {
-      alert('Erro ao carregar detalhes da receita');
+      alert('Erro ao carregar detalhes da receita')
     } finally {
       setLoading(false);
     }
+  };
+
+  useEffect(() => {
+    const carregarFavoritos = async () => {
+      const salvos = await AsyncStorage.getItem('@favoritos');
+      if(salvos){
+        setFavoritos(JSON.parse(salvos));
+      }
+    };
+    carregarFavoritos()
+  }, []);
+
+  const alternarFavorito = async (receita) => {
+    let novaLista = [...favoritos];
+    const jaEFavorito = novaLista.find(f => f.id === receita.id);
+
+    if (jaEFavorito) {
+      novaLista = novaLista.filter(f => f.id !== receita.id);
+    } else {
+      novaLista.push(receita);
+    }
+
+    setFavoritos(novaLista);
+    await AsyncStorage.setItem('@favoritos', JSON.stringify(novaLista));
   };
 
   return (
@@ -167,6 +202,8 @@ export default function HomeScreen() {
                   key={item.id}
                   title={item.title}
                   image={item.image}
+                  isFavorite={favoritos.some(f => f.id === item.id)}
+                  onFavoritePress={() => alternarFavorito(item)}  
                   onPress={() => selecionarReceita(item.id)}
                 />
               ))}
@@ -202,6 +239,20 @@ export default function HomeScreen() {
                     source={{ uri: receitaSelecionada.image }}
                     style={styles.modalImage}
                   />
+
+                  <TouchableOpacity 
+                    style={styles.modalFavoriteButton}
+                    onPress={() => alternarFavorito(receitaSelecionada)}
+                  >
+                    <Ionicons 
+                      name={favoritos.some(f => f.id === receitaSelecionada?.id) ? "heart" : "heart-outline"} 
+                      size={24} 
+                      color={colors.primary} 
+                    />
+                    <Text style={{color: colors.primary, marginLeft: 8}}>
+                      {favoritos.some(f => f.id === receitaSelecionada?.id) ? "Salvo" : "Favoritar"}
+                    </Text>
+                  </TouchableOpacity>
 
                   <Text
                     style={[
@@ -246,7 +297,15 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1 },
   content: { padding: 20, alignItems: 'center' },
-
+  modalFavoriteButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(200, 135, 178, 0.1)',
+    padding: 10,
+    borderRadius: 10,
+    marginBottom: 15,
+  },
   header: { alignItems: 'center', marginBottom: 30 },
   logoCircle: {
     width: 80,
