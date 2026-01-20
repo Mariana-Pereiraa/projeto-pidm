@@ -3,28 +3,23 @@ import {
   View, 
   Text, 
   StyleSheet, 
-  TouchableOpacity, 
-  ScrollView, 
-  Alert, 
-  Platform 
+  TouchableOpacity 
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../styles/themes';
 import { auth } from '../services/firebaseConfig';
 import { signOut } from 'firebase/auth';
 
-export default function SettingsScreen() {
-  const { styles, colors, isDark, toggleTheme } = useTheme();
+export default function SettingsScreen({ onEditProfile }) {
+  const { styles: globalStyles, colors, isDark, toggleTheme } = useTheme();
 
-const handleLogout = async () => {
-  console.log("Botão clicado! Tentando deslogar agora...");
-  try {
-    await signOut(auth);
-  } catch (error) {
-    console.error("Erro ao deslogar:", error);
-    alert("Erro ao sair");
-  }
-};
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+    } catch (error) {
+      alert("Erro ao sair");
+    }
+  };
 
   const renderSettingItem = (icon, title, value, type = 'arrow', onPress = null) => (
     <TouchableOpacity 
@@ -57,31 +52,33 @@ const handleLogout = async () => {
             backgroundColor: isDark ? '#FDF7FA' : '#FFFFFF',
             alignSelf: value ? 'flex-end' : 'flex-start',
             elevation: 2,
-            shadowColor: '#000',
-            shadowOffset: { width: 0, height: 1 },
-            shadowOpacity: 0.2,
           }} />
         </TouchableOpacity>
       ) : (
-        <Ionicons name="chevron-forward" size={20} color={colors.darkGray} />
+        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+          {title === 'Editar perfil' && (
+            <Text style={{ color: colors.darkGray, marginRight: 10 }}>
+              {auth.currentUser?.displayName || "Definir"}
+            </Text>
+          )}
+          <Ionicons name="chevron-forward" size={20} color={colors.darkGray} />
+        </View>
       )}
     </TouchableOpacity>
   );
 
   return (
-    <ScrollView 
-      style={[styles.container, { backgroundColor: colors.background }]} 
-      contentContainerStyle={[styles.content, { flexGrow: 1, paddingBottom: 40 }]}
-    >
-      <View style={styles.header}>
-        <View style={[styles.logoCircle, { backgroundColor: colors.primary }]}>
-          <Ionicons 
-            name="settings-outline" 
-            size={40} 
-            color={isDark ? "#2D1424" : "#FDF7FA"}
-          />
+    <View style={[globalStyles.container, { backgroundColor: colors.background, paddingHorizontal: 25 }]}>
+      <View style={[globalStyles.header, { marginTop: 40, marginBottom: 30 }]}>
+        <View style={[globalStyles.logoCircle, { backgroundColor: colors.primary }]}>
+          <Ionicons name="settings-outline" size={40} color={isDark ? "#2D1424" : "#FDF7FA"} />
         </View>
-        <Text style={[styles.title, { color: colors.primary }]}>CONFIGURAÇÕES</Text>
+        <Text style={[globalStyles.title, { color: colors.primary }]}>CONFIGURAÇÕES</Text>
+      </View>
+
+      <View style={localStyles.section}>
+        <Text style={[localStyles.sectionTitle, { color: colors.primary }]}>CONTA</Text>
+        {renderSettingItem('person-outline', 'Editar perfil', null, 'arrow', onEditProfile)}
       </View>
 
       <View style={localStyles.section}>
@@ -89,42 +86,67 @@ const handleLogout = async () => {
         {renderSettingItem('moon-outline', 'Modo Escuro', isDark, 'switch')}
       </View>
 
-      <TouchableOpacity 
-        style={[localStyles.logoutButton, { borderColor: colors.primary }]}
-        activeOpacity={0.6}
-        onPress={handleLogout}
-      >
-        <Text style={[localStyles.logoutText, { color: colors.primary }]}>SAIR DA CONTA</Text>
-      </TouchableOpacity>
-      
-      <Text style={[localStyles.version, { color: colors.darkGray }]}>Versão 1.0.0</Text>
-    </ScrollView>
+      <View style={localStyles.footer}>
+        <TouchableOpacity 
+          style={[localStyles.logoutButton, { borderColor: colors.primary }]}
+          onPress={handleLogout}
+        >
+          <Text style={[localStyles.logoutText, { color: colors.primary }]}>SAIR DA CONTA</Text>
+        </TouchableOpacity>
+        
+        <Text style={[localStyles.version, { color: colors.darkGray }]}>Versão 1.0.0</Text>
+      </View>
+    </View>
   );
 }
 
 const localStyles = StyleSheet.create({
-  section: { width: '100%', marginBottom: 25 },
-  sectionTitle: { fontSize: 14, fontWeight: 'bold', marginBottom: 10, marginLeft: 5 },
+  section: { 
+    width: '100%', 
+    marginBottom: 20 
+  },
+  sectionTitle: { 
+    fontSize: 13, 
+    fontWeight: 'bold', 
+    marginBottom: 5, 
+    marginLeft: 5 
+  },
   item: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingVertical: 15,
+    paddingVertical: 14,
     paddingHorizontal: 10,
     borderBottomWidth: 1,
   },
-  itemLeft: { flexDirection: 'row', alignItems: 'center' },
-  itemText: { fontSize: 16, marginLeft: 15 },
+  itemLeft: { 
+    flexDirection: 'row', 
+    alignItems: 'center' 
+  },
+  itemText: { 
+    fontSize: 16, 
+    marginLeft: 15 
+  },
+  footer: {
+    flex: 1,
+    justifyContent: 'flex-end', 
+    paddingBottom: 30,
+  },
   logoutButton: {
     width: '100%',
     padding: 15,
     borderRadius: 8,
     borderWidth: 1.5,
     alignItems: 'center',
-    marginTop: 20,
-    backgroundColor: 'transparent',
-    zIndex: 10,
   },
-  logoutText: { fontWeight: 'bold', fontSize: 16 },
-  version: { marginTop: 30, fontSize: 12, marginBottom: 20, textAlign: 'center', width: '100%' }
+  logoutText: { 
+    fontWeight: 'bold', 
+    fontSize: 16 
+  },
+  version: { 
+    marginTop: 15, 
+    fontSize: 12, 
+    textAlign: 'center', 
+    width: '100%' 
+  }
 });

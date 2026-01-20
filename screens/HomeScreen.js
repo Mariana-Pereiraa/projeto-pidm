@@ -24,12 +24,18 @@ import RecipeCard from '../components/RecipeCard';
 export default function HomeScreen() {
   const { colors, isDark } = useTheme();
 
-  const [nomeUsuario, setNomeUsuario] = useState("");
+  const [usuario, setUsuario] = useState({
+    nome: "",
+    foto: null
+  });
 
   useEffect(() => {
     const user = auth.currentUser;
-    if (user?.displayName) {
-      setNomeUsuario(user.displayName);
+    if (user) {
+      setUsuario({
+        nome: user.displayName || "",
+        foto: user.photoURL || null
+      });
     }
   }, []);
 
@@ -58,7 +64,7 @@ export default function HomeScreen() {
       const resultado = await buscarReceitasPorIngredientes(listaIngredientes);
       setReceitas(resultado);
     } catch {
-      alert('Erro ao buscar receitas 😢');
+      alert('Erro ao buscar receitas');
     } finally {
       setLoading(false);
     }
@@ -82,9 +88,21 @@ export default function HomeScreen() {
       <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} />
 
       <View style={styles.topBar}>
-        <Text style={[styles.welcomeText, { color: colors.primary }]}>
-          Olá, Chefe {nomeUsuario}!
-        </Text>
+        <View style={styles.userInfoContainer}>
+          {usuario.foto ? (
+            <Image 
+              source={{ uri: usuario.foto }} 
+              style={[styles.miniProfilePhoto, { borderColor: colors.primary }]} 
+            />
+          ) : (
+            <View style={[styles.miniPlaceholder, { backgroundColor: colors.surface }]}>
+              <Ionicons name="person" size={16} color={colors.primary} />
+            </View>
+          )}
+          <Text style={[styles.welcomeText, { color: colors.primary }]}>
+            Olá, Chefe {usuario.nome}!
+          </Text>
+        </View>
       </View>
 
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
@@ -118,7 +136,7 @@ export default function HomeScreen() {
                 { backgroundColor: colors.surface, color: colors.text },
               ]}
               placeholder="Ex: tomate, queijo, leite..."
-              placeholderTextColor={isDark ? '#AAA' : '#888'}
+              placeholderTextColor={isDark ? "#FFFFFF" : "#888"}
               value={ingrediente}
               onChangeText={setIngrediente}
             />
@@ -254,6 +272,27 @@ const styles = StyleSheet.create({
     width: '100%',
     paddingHorizontal: 25,
     paddingTop: 15,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  userInfoContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  miniProfilePhoto: {
+    width: 35,
+    height: 35,
+    borderRadius: 17.5,
+    borderWidth: 1.5,
+    marginRight: 10,
+  },
+  miniPlaceholder: {
+    width: 35,
+    height: 35,
+    borderRadius: 17.5,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 10,
   },
   welcomeText: {
     fontSize: 14,
