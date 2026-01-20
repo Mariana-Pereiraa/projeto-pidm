@@ -4,12 +4,7 @@ import { StyleSheet, useColorScheme } from 'react-native';
 const ThemeContext = createContext();
 
 export const ThemeProvider = ({ children }) => {
-  const systemColorScheme = useColorScheme();
-  const [isDark, setIsDark] = useState(systemColorScheme === 'dark');
-
-  useEffect(() => {
-    setIsDark(systemColorScheme === 'dark');
-  }, [systemColorScheme]);
+  const [isDark, setIsDark] = useState(false);
 
   const toggleTheme = () => setIsDark(prev => !prev);
 
