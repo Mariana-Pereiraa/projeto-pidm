@@ -32,15 +32,14 @@ export default function EditProfileScreen({ onBack }) {
     }
 
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      mediaTypes: ['images'],
       allowsEditing: true, 
       aspect: [1, 1],      
-      quality: 0.5,        
+      quality: 0.7,        
     });
 
-    if (!result.canceled) {
-      const novaFoto = result.assets[0].uri;
-      setPhotoURL(novaFoto); 
+    if (!result.canceled && result.assets && result.assets.length > 0) {
+      setPhotoURL(result.assets[0].uri); 
     }
   };
 
@@ -60,17 +59,10 @@ export default function EditProfileScreen({ onBack }) {
       await auth.currentUser.reload();
 
       Alert.alert("Sucesso", "Perfil atualizado!", [
-        { 
-          text: "OK", 
-          onPress: () => {
-            setTimeout(() => {
-              onBack(); 
-            }, 500);
-          } 
-        }
+        { text: "OK", onPress: () => setTimeout(() => onBack(), 500) }
       ]);
     } catch (error) {
-      console.error("Erro ao atualizar perfil:", error);
+      console.error(error);
       Alert.alert("Erro", "Não foi possível atualizar o perfil.");
     } finally {
       setLoading(false);
@@ -89,22 +81,27 @@ export default function EditProfileScreen({ onBack }) {
       <Text style={[styles.title, { color: colors.primary }]}>EDITAR PERFIL</Text>
 
       <View style={styles.photoContainer}>
-        <TouchableOpacity onPress={escolherFoto} activeOpacity={0.8}>
+        <TouchableOpacity onPress={escolherFoto} activeOpacity={0.8} disabled={loading}>
           <View style={[styles.imageWrapper, { borderColor: colors.primary }]}>
             {photoURL ? (
-              <Image source={{ uri: photoURL }} style={styles.profileImage} />
+              <Image 
+                key={photoURL} 
+                source={{ uri: photoURL }} 
+                style={styles.profileImage} 
+              />
             ) : (
               <View style={[styles.placeholder, { backgroundColor: colors.surface }]}>
                 <Ionicons name="person" size={50} color={colors.darkGray} />
               </View>
             )}
-            <View style={[styles.cameraBadge, { backgroundColor: colors.primary }]}>
-              <Ionicons name="camera" size={16} color="#FFF" />
+
+            <View style={[styles.cameraBadge, { backgroundColor: colors.primary, borderColor: colors.background }]}>
+              <Ionicons name="camera" size={18} color="#FFF" />
             </View>
           </View>
         </TouchableOpacity>
         <Text style={[styles.photoInstructions, { color: colors.darkGray }]}>
-          Toque para alterar e redimensionar
+          Toque para alterar a foto
         </Text>
       </View>
 
@@ -129,11 +126,7 @@ export default function EditProfileScreen({ onBack }) {
         onPress={salvarAlteracoes}
         disabled={loading}
       >
-        {loading ? (
-          <ActivityIndicator color="#FFF" />
-        ) : (
-          <Text style={styles.saveButtonText}>SALVAR ALTERAÇÕES</Text>
-        )}
+        {loading ? <ActivityIndicator color="#FFF" /> : <Text style={styles.saveButtonText}>SALVAR ALTERAÇÕES</Text>}
       </TouchableOpacity>
     </View>
   );
@@ -144,8 +137,7 @@ const styles = StyleSheet.create({
     flex: 1, 
     paddingHorizontal: 25, 
     paddingTop: 50, 
-    paddingBottom: 30,
-    justifyContent: 'flex-start' 
+    paddingBottom: 30 
   },
   backButton: { 
     flexDirection: 'row', 
@@ -172,39 +164,48 @@ const styles = StyleSheet.create({
     height: 120, 
     borderRadius: 60, 
     borderWidth: 3, 
-    position: 'relative' 
+    position: 'relative',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   profileImage: { 
     width: '100%', 
     height: '100%', 
-    borderRadius: 60 
+    borderRadius: 60,
+    overflow: 'hidden',
+    resizeMode: 'cover'
   },
   placeholder: { 
     width: '100%', 
     height: '100%', 
-    borderRadius: 60, 
+    borderRadius: 60,
+    overflow: 'hidden',
     justifyContent: 'center', 
     alignItems: 'center' 
   },
   cameraBadge: { 
     position: 'absolute', 
-    bottom: 2, 
-    right: 2, 
-    width: 32, 
-    height: 32, 
-    borderRadius: 16, 
+    bottom: -5,
+    right: -5,
+    width: 38, 
+    height: 38, 
+    borderRadius: 19, 
     justifyContent: 'center', 
     alignItems: 'center', 
-    borderWidth: 2, 
-    borderColor: '#FFF' 
+    borderWidth: 3, 
+    elevation: 5,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 3
   },
   photoInstructions: { 
-    marginTop: 10, 
+    marginTop: 15, 
     fontSize: 12 
   },
   inputSection: { 
     width: '100%', 
-    marginBottom: 30 
+    marginBottom: 40 
   },
   label: { 
     fontSize: 12, 
@@ -222,8 +223,7 @@ const styles = StyleSheet.create({
     height: 55, 
     borderRadius: 10, 
     justifyContent: 'center', 
-    alignItems: 'center', 
-    elevation: 2 
+    alignItems: 'center' 
   },
   saveButtonText: { 
     color: '#FFF', 

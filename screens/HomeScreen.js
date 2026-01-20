@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   StyleSheet,
   View,
@@ -11,6 +11,7 @@ import {
   StatusBar,
 } from 'react-native';
 
+import { useFocusEffect } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 
 import { auth } from '../services/firebaseConfig';
@@ -29,15 +30,17 @@ export default function HomeScreen() {
     foto: null
   });
 
-  useEffect(() => {
-    const user = auth.currentUser;
-    if (user) {
-      setUsuario({
-        nome: user.displayName || "",
-        foto: user.photoURL || null
-      });
-    }
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      const user = auth.currentUser;
+      if (user) {
+        setUsuario({
+          nome: user.displayName || "",
+          foto: user.photoURL || null
+        });
+      }
+    }, [])
+  );
 
   const [modalVisivel, setModalVisivel] = useState(false);
   const [receitaSelecionada, setReceitaSelecionada] = useState(null);
@@ -91,6 +94,7 @@ export default function HomeScreen() {
         <View style={styles.userInfoContainer}>
           {usuario.foto ? (
             <Image 
+              key={usuario.foto}
               source={{ uri: usuario.foto }} 
               style={[styles.miniProfilePhoto, { borderColor: colors.primary }]} 
             />
