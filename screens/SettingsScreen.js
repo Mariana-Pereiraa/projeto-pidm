@@ -1,10 +1,34 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Switch } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../styles/themes';
 
+import { auth } from '../services/firebaseConfig';
+import { signOut } from 'firebase/auth';
+
 export default function SettingsScreen() {
   const { styles, colors, isDark, toggleTheme } = useTheme();
+
+  const handleLogout = () => {
+    Alert.alert(
+      "Sair",
+      "Tem certeza que deseja sair da conta?",
+      [
+        { text: "Cancelar", style: "cancel" },
+        { 
+          text: "Sair", 
+          style: "destructive",
+          onPress: async () => {
+            try {
+              await signOut(auth);
+            } catch (error) {
+              Alert.alert("Erro", "Não foi possível sair agora.");
+            }
+          } 
+        }
+      ]
+    );
+  };
 
   const renderSettingItem = (icon, title, value, type = 'arrow', onPress = null) => (
     <TouchableOpacity 
@@ -18,33 +42,33 @@ export default function SettingsScreen() {
       </View>
       
       {type === 'switch' ? (
-  <TouchableOpacity 
-    activeOpacity={0.8} 
-    onPress={toggleTheme}
-    style={{
-      width: 50,
-      height: 28,
-      borderRadius: 15,
-      padding: 2,
-      backgroundColor: value ? colors.primary : (isDark ? '#4A263D' : '#DBC2D1'),
-      justifyContent: 'center',
-    }}
-  >
-    <View style={{
-      width: 24,
-      height: 24,
-      borderRadius: 12,
-      backgroundColor: isDark ? '#FDF7FA' : '#FFFFFF',
-      alignSelf: value ? 'flex-end' : 'flex-start',
-      elevation: 2,
-      shadowColor: '#000',
-      shadowOffset: { width: 0, height: 1 },
-      shadowOpacity: 0.2,
-    }} />
-  </TouchableOpacity>
-) : (
-  <Ionicons name="chevron-forward" size={20} color={colors.darkGray} />
-)}
+        <TouchableOpacity 
+          activeOpacity={0.8} 
+          onPress={toggleTheme}
+          style={{
+            width: 50,
+            height: 28,
+            borderRadius: 15,
+            padding: 2,
+            backgroundColor: value ? colors.primary : (isDark ? '#4A263D' : '#DBC2D1'),
+            justifyContent: 'center',
+          }}
+        >
+          <View style={{
+            width: 24,
+            height: 24,
+            borderRadius: 12,
+            backgroundColor: isDark ? '#FDF7FA' : '#FFFFFF',
+            alignSelf: value ? 'flex-end' : 'flex-start',
+            elevation: 2,
+            shadowColor: '#000',
+            shadowOffset: { width: 0, height: 1 },
+            shadowOpacity: 0.2,
+          }} />
+        </TouchableOpacity>
+      ) : (
+        <Ionicons name="chevron-forward" size={20} color={colors.darkGray} />
+      )}
     </TouchableOpacity>
   );
 
@@ -68,7 +92,7 @@ export default function SettingsScreen() {
 
       <TouchableOpacity 
         style={[localStyles.logoutButton, { borderColor: colors.primary }]}
-        onPress={() => alert('Sair clicado')}
+        onPress={handleLogout}
       >
         <Text style={[localStyles.logoutText, { color: colors.primary }]}>SAIR DA CONTA</Text>
       </TouchableOpacity>
