@@ -4,7 +4,7 @@
     "slug": "projeto-final",
     "version": "1.0.0",
     "extra": {
-      "SPOONACULAR_API_KEY": "0625c9cfe42d4e22a40983dc54be9a75"
+      "SPOONACULAR_API_KEY": "6daea57f20404be2a5c4d59c74bb9991"
     },
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",

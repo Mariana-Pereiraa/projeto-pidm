@@ -9,7 +9,7 @@ export default function IngredientInput({ value, onChangeText, onAdd }) {
       <View style={styles.inputRow}>
         <TextInput
           style={styles.input}
-          placeholder="Ex: tomate, queijo, leite..."
+          placeholder="Ex: tomato, cheese, milk..."
           value={value}
           onChangeText={onChangeText}
         />

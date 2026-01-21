@@ -165,7 +165,7 @@ export default function HomeScreen() {
                 styles.input,
                 { backgroundColor: colors.surface, color: colors.text },
               ]}
-              placeholder="Ex: tomate, queijo, leite..."
+              placeholder="Ex: tomato, cheese, milk..."
               placeholderTextColor={isDark ? "#FFFFFF" : "#888"}
               value={ingrediente}
               onChangeText={setIngrediente}
