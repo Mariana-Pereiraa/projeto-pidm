@@ -69,7 +69,7 @@ export default function HomeScreen() {
       const resultado = await buscarReceitasPorIngredientes(listaIngredientes);
       setReceitas(resultado);
     } catch {
-      alert('Erro ao buscar receitas');
+      alert('Error loading recipes');
     } finally {
       setLoading(false);
     }
@@ -82,7 +82,7 @@ export default function HomeScreen() {
       setReceitaSelecionada(detalhes)
       setModalVisivel(true)
     } catch {
-      alert('Erro ao carregar detalhes da receita')
+      alert('Error loading recipe details')
     } finally {
       setLoading(false);
     }
@@ -130,7 +130,7 @@ export default function HomeScreen() {
             </View>
           )}
           <Text style={[styles.welcomeText, { color: colors.primary }]}>
-            Olá, Chefe {usuario.nome}!
+            Hi, Chef {usuario.nome}
           </Text>
         </View>
       </View>
@@ -146,17 +146,17 @@ export default function HomeScreen() {
           </View>
 
           <Text style={[styles.title, { color: colors.primary }]}>
-            CHEF EM CASA
+            CHEF AT HOME
           </Text>
 
           <Text style={[styles.subtitle, { color: colors.darkGray }]}>
-            DESCUBRA RECEITAS INCRÍVEIS COM OS INGREDIENTES QUE VOCÊ TEM
+            DISCOVER AMAZING RECIPES WITH THE INGREDIENTS YOU HAVE
           </Text>
         </View>
 
         <View style={styles.ingredientsSection}>
           <Text style={[styles.label, { color: colors.primary }]}>
-            MEUS INGREDIENTES
+            MY INGREDIENTS
           </Text>
 
           <View style={styles.inputRow}>
@@ -165,7 +165,7 @@ export default function HomeScreen() {
                 styles.input,
                 { backgroundColor: colors.surface, color: colors.text },
               ]}
-              placeholder="Ex: tomato, cheese, milk..."
+              placeholder="Example: tomato, cheese, milk…"
               placeholderTextColor={isDark ? "#FFFFFF" : "#888"}
               value={ingrediente}
               onChangeText={setIngrediente}
@@ -212,7 +212,7 @@ export default function HomeScreen() {
             disabled={loading}
           >
             <Text style={styles.searchButtonText}>
-              {loading ? 'BUSCANDO...' : 'ENCONTRAR RECEITAS'}
+              {loading ? 'SEARCHING...' : 'FIND RECIPES'}
             </Text>
           </TouchableOpacity>
         )}
@@ -220,7 +220,7 @@ export default function HomeScreen() {
         {receitas.length > 0 && (
           <View style={styles.resultsContainer}>
             <Text style={[styles.label, { marginTop: 20, color: colors.primary }]}>
-              RECEITAS ENCONTRADAS
+              RECIPES FOUND
             </Text>
 
             <View style={styles.grid}>
@@ -277,7 +277,7 @@ export default function HomeScreen() {
                       color={colors.primary} 
                     />
                     <Text style={{color: colors.primary, marginLeft: 8}}>
-                      {favoritos.some(f => f.id === receitaSelecionada?.id) ? "Salvo" : "Favoritar"}
+                      {favoritos.some(f => f.id === receitaSelecionada?.id) ? "Saved" : "Favorite"}
                     </Text>
                   </TouchableOpacity>
 
@@ -286,7 +286,7 @@ export default function HomeScreen() {
                   </Text>
 
                   <Text style={[styles.modalSectionTitle, {color: colors.text}]}>
-                    INGREDIENTES
+                    Ingredients
                   </Text>
 
                   {receitaSelecionada.extendedIngredients?.map((ing, index) => (
@@ -296,11 +296,11 @@ export default function HomeScreen() {
                   ))}
 
                   <Text style={[styles.modalSectionTitle, {color: colors.text}]}>
-                    MODO DE PREPARO
+                    Instructions
                   </Text>
 
                   <Text style={[styles.modalText, {color: colors.text}]}>
-                    {receitaSelecionada.instructions?.replace(/<[^>]*>?/gm, '') || 'Instruções não disponíveis.'}
+                    {receitaSelecionada.instructions?.replace(/<[^>]*>?/gm, '') || 'Instructions not available.'}
                   </Text>
                 </>
               )}

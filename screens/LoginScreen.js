@@ -26,24 +26,24 @@ export default function LoginScreen({ onLogin, onGoToRegister }) {
 
   const handleFirebaseLogin = async () => {
     if (!email || !senha) {
-      Alert.alert("Erro", "Por favor, preencha todos os campos.");
+      Alert.alert("Error", "All fields are required.");
       return;
     }
 
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, senha);
-      console.log("Logado com sucesso:", userCredential.user.email);
+      console.log("Login successful:", userCredential.user.email);
       
       onLogin(); 
       
     } catch (error) {
       console.log(error.code);
       if (error.code === 'auth/invalid-credential' || error.code === 'auth/wrong-password' || error.code === 'auth/user-not-found') {
-        Alert.alert("Erro", "E-mail ou senha incorretos.");
+        Alert.alert("Error", "Incorrect email or password.");
       } else if (error.code === 'auth/invalid-email') {
-        Alert.alert("Erro", "O formato do e-mail é inválido.");
+        Alert.alert("Error", "Invalid email format.");
       } else {
-        Alert.alert("Erro", "Não foi possível entrar. Tente novamente mais tarde.");
+        Alert.alert("Error", "Unable to sign in. Please try again later.");
       }
     }
   };
@@ -65,13 +65,13 @@ export default function LoginScreen({ onLogin, onGoToRegister }) {
               color={isDark ? colors.background : "#FFFFFF"} 
             />
           </View>
-          <Text style={[styles.title, { color: colors.primary }]}>CHEF EM CASA</Text>
+          <Text style={[styles.title, { color: colors.primary }]}>CHEF AT HOME</Text>
         </View>
 
         <View style={styles.form}>
           <TextInput
             style={[styles.input, { backgroundColor: colors.surface, color: colors.text, borderColor: colors.border }]}
-            placeholder="E-MAIL"
+            placeholder="EMAIL"
             placeholderTextColor={colors.darkGray}
             value={email}
             onChangeText={setEmail}
@@ -82,7 +82,7 @@ export default function LoginScreen({ onLogin, onGoToRegister }) {
           <View style={[styles.passwordContainer, { backgroundColor: colors.surface, borderColor: colors.border }]}>
             <TextInput
               style={[styles.inputPassword, { color: colors.text }]}
-              placeholder="SENHA"
+              placeholder="PASSWORD"
               placeholderTextColor={colors.darkGray}
               value={senha}
               onChangeText={setSenha}
@@ -110,7 +110,7 @@ export default function LoginScreen({ onLogin, onGoToRegister }) {
             onPress={onGoToRegister}
           >
             <Text style={[styles.registerText, { color: colors.text }]}>
-              AINDA NÃO TEM LOGIN? <Text style={[styles.boldText, { color: colors.primary }]}>CADASTRE-SE</Text>
+              DON'T HAVE AN ACCOUNT YET?? <Text style={[styles.boldText, { color: colors.primary }]}>SIGN UP</Text>
             </Text>
           </TouchableOpacity>
         </View>

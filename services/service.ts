@@ -17,7 +17,7 @@ export async function buscarReceitasPorIngredientes(
   );
 
   if (!response.ok) {
-    throw new Error('Erro ao buscar receitas');
+    throw new Error('Error loading for recipes');
   }
 
   return response.json();
@@ -29,7 +29,7 @@ export async function buscarDetalhesReceita(id: number) {
     );
   
     if (!response.ok) {
-      throw new Error('Erro ao buscar detalhes');
+      throw new Error('Error loading details');
     }
   
     return response.json();
