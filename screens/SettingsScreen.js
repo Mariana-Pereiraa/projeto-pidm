@@ -73,17 +73,17 @@ export default function SettingsScreen({ onEditProfile }) {
         <View style={[globalStyles.logoCircle, { backgroundColor: colors.primary }]}>
           <Ionicons name="settings-outline" size={40} color={isDark ? "#2D1424" : "#FDF7FA"} />
         </View>
-        <Text style={[globalStyles.title, { color: colors.primary }]}>CONFIGURAÇÕES</Text>
+        <Text style={[globalStyles.title, { color: colors.primary }]}>SETTINGS</Text>
       </View>
 
       <View style={localStyles.section}>
-        <Text style={[localStyles.sectionTitle, { color: colors.primary }]}>CONTA</Text>
-        {renderSettingItem('person-outline', 'Editar perfil', null, 'arrow', onEditProfile)}
+        <Text style={[localStyles.sectionTitle, { color: colors.primary }]}>ACCOUNT</Text>
+        {renderSettingItem('person-outline', 'Edit profile', null, 'arrow', onEditProfile)}
       </View>
 
       <View style={localStyles.section}>
-        <Text style={[localStyles.sectionTitle, { color: colors.primary }]}>PREFERÊNCIAS</Text>
-        {renderSettingItem('moon-outline', 'Modo Escuro', isDark, 'switch')}
+        <Text style={[localStyles.sectionTitle, { color: colors.primary }]}>PREFERENCES</Text>
+        {renderSettingItem('moon-outline', 'Dark theme', isDark, 'switch')}
       </View>
 
       <View style={localStyles.footer}>
@@ -91,10 +91,10 @@ export default function SettingsScreen({ onEditProfile }) {
           style={[localStyles.logoutButton, { borderColor: colors.primary }]}
           onPress={handleLogout}
         >
-          <Text style={[localStyles.logoutText, { color: colors.primary }]}>SAIR DA CONTA</Text>
+          <Text style={[localStyles.logoutText, { color: colors.primary }]}>LOG OUT</Text>
         </TouchableOpacity>
         
-        <Text style={[localStyles.version, { color: colors.darkGray }]}>Versão 1.0.0</Text>
+        <Text style={[localStyles.version, { color: colors.darkGray }]}>Version 1.0.0</Text>
       </View>
     </View>
   );

@@ -33,23 +33,23 @@ const handleFirebaseRegister = async () => {
   const emailLimpo = email.trim();
 
   if (!nomeLimpo || !emailLimpo || !senha || !confirmarSenha) {
-    alert("Preencha todos os campos!");
+    alert("All fields are required!");
     return;
   }
 
   const emailRegex = /\S+@\S+\.\S+/;
   if (!emailRegex.test(emailLimpo)) {
-    alert("E-mail inválido! Use o formato: nome@exemplo.com");
+    alert("Invalid email! Use the format: name@example.com");
     return;
   }
 
   if (senha !== confirmarSenha) {
-    alert("As senhas não coincidem!");
+    alert("Passwords do not match!");
     return;
   }
 
   if (senha.length < 6) {
-    alert("A senha deve ter pelo menos 6 caracteres.");
+    alert("Password must be at least 6 characters.");
     return;
   }
 
@@ -60,18 +60,18 @@ const handleFirebaseRegister = async () => {
       displayName: nomeLimpo
     });
     
-    alert("Conta criada com sucesso! Chefe " + nomeLimpo + ", seja bem-vindo(a).");
+    alert("Account created successfully! Chef " + nomeLimpo + ", welcome.");
     onBackToLogin(); 
     
   } catch (error) {
-    console.log("Erro Firebase:", error.code);
+    console.log("Error Firebase:", error.code);
 
     if (error.code === 'auth/email-already-in-use') {
-      alert("Este e-mail já está cadastrado em outra conta.");
+      alert("This email is already in use.");
     } else if (error.code === 'auth/invalid-email') {
-      alert("O endereço de e-mail é inválido.");
+      alert("Invalid email address.");
     } else {
-      alert("Erro ao cadastrar: " + error.message);
+      alert("Registration failed: " + error.message);
     }
   }
 };
@@ -96,14 +96,14 @@ const handleFirebaseRegister = async () => {
               color={isDark ? colors.background : "#FFFFFF"} 
             />
           </View>
-          <Text style={[styles.title, { color: colors.primary }]}>CHEF EM CASA</Text>
-          <Text style={[styles.subtitle, { color: colors.primary }]}>CADASTRO</Text>
+          <Text style={[styles.title, { color: colors.primary }]}>CHEF AT HOME</Text>
+          <Text style={[styles.subtitle, { color: colors.primary }]}>SIGN UP</Text>
         </View>
 
         <View style={styles.form}>
           <TextInput
             style={[styles.input, { backgroundColor: colors.surface, color: colors.text, borderColor: colors.border }]}
-            placeholder="NOME"
+            placeholder="NAME"
             placeholderTextColor={colors.darkGray}
             value={nome}
             onChangeText={setNome}
@@ -116,7 +116,7 @@ const handleFirebaseRegister = async () => {
               color: colors.text, 
               borderColor: colors.border 
             }]}
-            placeholder="E-MAIL"
+            placeholder="EMAIL"
             placeholderTextColor={colors.darkGray}
             value={email}
             onChangeText={setEmail}
@@ -128,7 +128,7 @@ const handleFirebaseRegister = async () => {
           <View style={[styles.passwordContainer, { backgroundColor: colors.surface, borderColor: colors.border }]}>
             <TextInput
               style={[styles.inputPassword, { color: colors.text }]}
-              placeholder="SENHA"
+              placeholder="PASSWORD"
               placeholderTextColor={colors.darkGray}
               secureTextEntry={verSenha}
               value={senha}
@@ -142,7 +142,7 @@ const handleFirebaseRegister = async () => {
           <View style={[styles.passwordContainer, { backgroundColor: colors.surface, borderColor: colors.border }]}>
             <TextInput
               style={[styles.inputPassword, { color: colors.text }]}
-              placeholder="CONFIRME SUA SENHA"
+              placeholder="CONFIRM PASSWORD"
               placeholderTextColor={colors.darkGray}
               secureTextEntry={verConfirmar}
               value={confirmarSenha}

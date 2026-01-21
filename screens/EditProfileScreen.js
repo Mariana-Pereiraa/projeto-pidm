@@ -27,7 +27,7 @@ export default function EditProfileScreen({ onBack }) {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     
     if (status !== 'granted') {
-      Alert.alert("Permissão negada", "Precisamos de acesso às suas fotos.");
+      Alert.alert("Access denied", "We need access to your photos.");
       return;
     }
 
@@ -45,7 +45,7 @@ export default function EditProfileScreen({ onBack }) {
 
   const salvarAlteracoes = async () => {
     if (!nome.trim()) {
-      Alert.alert("Erro", "O nome não pode estar vazio.");
+      Alert.alert("Error", "Name is required.");
       return;
     }
 
@@ -58,12 +58,12 @@ export default function EditProfileScreen({ onBack }) {
 
       await auth.currentUser.reload();
 
-      Alert.alert("Sucesso", "Perfil atualizado!", [
+      Alert.alert("Sucess", "Profile updated successfully!", [
         { text: "OK", onPress: () => setTimeout(() => onBack(), 500) }
       ]);
     } catch (error) {
       console.error(error);
-      Alert.alert("Erro", "Não foi possível atualizar o perfil.");
+      Alert.alert("Error", "Failed to update profile.");
     } finally {
       setLoading(false);
     }
@@ -75,10 +75,10 @@ export default function EditProfileScreen({ onBack }) {
       
       <TouchableOpacity onPress={onBack} style={styles.backButton}>
         <Ionicons name="arrow-back" size={28} color={colors.primary} />
-        <Text style={[styles.backText, { color: colors.primary }]}>Configurações</Text>
+        <Text style={[styles.backText, { color: colors.primary }]}>Settings</Text>
       </TouchableOpacity>
 
-      <Text style={[styles.title, { color: colors.primary }]}>EDITAR PERFIL</Text>
+      <Text style={[styles.title, { color: colors.primary }]}>EDIT PROFILE</Text>
 
       <View style={styles.photoContainer}>
         <TouchableOpacity onPress={escolherFoto} activeOpacity={0.8} disabled={loading}>
@@ -101,12 +101,12 @@ export default function EditProfileScreen({ onBack }) {
           </View>
         </TouchableOpacity>
         <Text style={[styles.photoInstructions, { color: colors.darkGray }]}>
-          Toque para alterar a foto
+          Tap to change the photo
         </Text>
       </View>
 
       <View style={styles.inputSection}>
-        <Text style={[styles.label, { color: colors.primary }]}>SEU NOME</Text>
+        <Text style={[styles.label, { color: colors.primary }]}>USERNAME</Text>
         <TextInput
           style={[styles.input, { 
             backgroundColor: colors.surface, 
@@ -126,7 +126,7 @@ export default function EditProfileScreen({ onBack }) {
         onPress={salvarAlteracoes}
         disabled={loading}
       >
-        {loading ? <ActivityIndicator color="#FFF" /> : <Text style={styles.saveButtonText}>SALVAR ALTERAÇÕES</Text>}
+        {loading ? <ActivityIndicator color="#FFF" /> : <Text style={styles.saveButtonText}>SAVE CHANGES</Text>}
       </TouchableOpacity>
     </View>
   );
